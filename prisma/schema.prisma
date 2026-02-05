@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String         @id @default(auto()) @map("_id") @db.ObjectId
+  name              String
+  email             String         @unique
+  password          String
+  avatarUrl         String?
+  bio               String?
+  location          String?
+  post              Post[]
+  sessions          Session[]
+  refreshToken      String
+  createdAt         DateTime       @default(now())
+  comments          Comment[]
+  notifications     Notification[] @relation("NotificationToUser")
+  sentNotifications Notification[] @relation("NotificationFromUser")
+  sentFriendReqs    FriendReq[]    @relation("FriendRequestFrom")
+  recivedFriendReqs FriendReq[]    @relation("FriendRequestTo")
+  likes             Like[]
+  friendReqs        FriendReq[]
+  messages          Message[]
+}
+
+model Post {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  imageUrl    String?
+  ownerId     String    @db.ObjectId
+  user        User      @relation(fields: [ownerId], references: [id])
+  comments    Comment[]
+  createdAt   DateTime  @default(now())
+  likes       Like[]
+
+  @@index([ownerId])
+}
+
+model Like {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  postId   String   @db.ObjectId
+  post     Post     @relation(fields: [postId], references: [id])
+  likerId  String   @db.ObjectId
+  user     User     @relation(fields: [likerId], references: [id])
+  createAt DateTime @default(now())
+
+  @@unique([likerId, postId])
+  @@index([postId])
+}
+
+model Comment {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  comment     String
+  postId      String   @db.ObjectId
+  post        Post     @relation(fields: [postId], references: [id])
+  commenterId String   @db.ObjectId
+  user        User     @relation(fields: [commenterId], references: [id])
+  createAt    DateTime @default(now())
+
+  @@index([postId])
+  @@index([commenterId])
+}
+
+model Session {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  reciverId   String           @db.ObjectId
+  senderId    String           @db.ObjectId
+  reciver     User             @relation("NotificationToUser", fields: [reciverId], references: [id])
+  sender      User             @relation("NotificationFromUser", fields: [senderId], references: [id])
+  postId      String?
+  accepted    Boolean?
+  status      FriendReqStatus? @default(PENDING)
+  type        String
+  message     String?
+  friendReqId String?          @db.ObjectId
+  read        Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  @@unique([senderId, postId, type], name: "senderId_postId_type")
+}
+
+model Conversation {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  isGroup      Boolean  @default(false)
+  name         String?
+  participants String[]
+  lastMessage  String?
+  createdAt    DateTime @default(now())
+  upadeteAt    DateTime @updatedAt
+
+  messages Message[]
+
+  @@index([participants])
+}
+
+model Message {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  conversationId String       @db.ObjectId
+  senderId       String       @db.ObjectId
+  sender         User         @relation(fields: [senderId], references: [id])
+  text           String?
+  mediaUrl       String?
+  mediaType      String?
+  seenBy         String[]
+  createdAt      DateTime     @default(now())
+  deletedAt      DateTime?
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+
+  @@index([conversationId])
+  @@index([senderId])
+}
+
+model FriendReq {
+  id        String          @id @default(auto()) @map("_id") @db.ObjectId
+  senderId  String          @db.ObjectId
+  reciverId String          @db.ObjectId
+  sender    User            @relation("FriendRequestTo", fields: [senderId], references: [id])
+  reciver   User            @relation("FriendRequestFrom", fields: [reciverId], references: [id])
+  status    FriendReqStatus @default(NOTSTARTED)
+  createdAt DateTime        @default(now())
+
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String? @db.ObjectId
+
+  @@unique([senderId, reciverId], name: "senderId_reciverId")
+}
+
+model Frendship {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  user1Id   String    @db.ObjectId
+  user2Id   String    @db.ObjectId
+  createAt  DateTime  @default(now())
+  deletedAt DateTime?
+
+  @@unique([user1Id, user2Id])
+  @@index([user1Id])
+  @@index([user2Id])
+}
+
+enum FriendReqStatus {
+  NOTSTARTED
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
