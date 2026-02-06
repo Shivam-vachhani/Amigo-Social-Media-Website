@@ -8,11 +8,15 @@ import {
   User,
   Mail,
   Lock,
+  UserPlus,
+  Sparkles,
+  AlertCircle,
 } from "lucide-react";
 import { RegisterUser } from "@/lib/interfaces";
 import { api } from "@/lib/axios";
+import Link from "next/link";
 
-const RegisterPage = () => {
+const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState<RegisterUser>({
     name: "",
     email: "",
@@ -27,6 +31,7 @@ const RegisterPage = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [passwordFocus, setPasswordFocus] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Password validation checks
   const passwordChecks = {
@@ -35,6 +40,33 @@ const RegisterPage = () => {
     lowercase: /[a-z]/.test(formData.password),
     number: /[0-9]/.test(formData.password),
     special: /[!@#$%^&*(),.?":{}|<>]/.test(formData.password),
+  };
+
+  // Calculate password strength (0-5)
+  const passwordStrength = Object.values(passwordChecks).filter(Boolean).length;
+
+  const getStrengthColor = () => {
+    if (passwordStrength === 0) return "bg-gray-200";
+    if (passwordStrength <= 2) return "bg-red-500";
+    if (passwordStrength <= 3) return "bg-orange-500";
+    if (passwordStrength <= 4) return "bg-yellow-500";
+    return "bg-green-500";
+  };
+
+  const getStrengthText = () => {
+    if (passwordStrength === 0) return "";
+    if (passwordStrength <= 2) return "Weak";
+    if (passwordStrength <= 3) return "Fair";
+    if (passwordStrength <= 4) return "Good";
+    return "Strong";
+  };
+
+  // Get the first error message to display at bottom
+  const getFirstError = () => {
+    if (errors.name) return errors.name;
+    if (errors.email) return errors.email;
+    if (errors.password) return errors.password;
+    return "";
   };
 
   const validateName = (name: string) => {
@@ -62,20 +94,8 @@ const RegisterPage = () => {
     if (!password) {
       return "Password is required";
     }
-    if (password.length < 8) {
-      return "Password must be at least 8 characters";
-    }
-    if (!/[A-Z]/.test(password)) {
-      return "Password must contain at least one uppercase letter";
-    }
-    if (!/[a-z]/.test(password)) {
-      return "Password must contain at least one lowercase letter";
-    }
-    if (!/[0-9]/.test(password)) {
-      return "Password must contain at least one number";
-    }
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      return "Password must contain at least one special character";
+    if (passwordStrength < 5) {
+      return "Password must meet all requirements";
     }
     return "";
   };
@@ -98,22 +118,12 @@ const RegisterPage = () => {
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    const field = name as keyof RegisterUser;
-    let error = "";
+    const { name } = e.target;
 
-    if (name === "name") {
-      error = validateName(value);
-    } else if (name === "email") {
-      error = validateEmail(value);
-    } else if (name === "password") {
-      error = validatePassword(value);
+    // Only hide password requirements on blur, don't validate
+    if (name === "password") {
+      setPasswordFocus(false);
     }
-
-    setErrors((prev) => ({
-      ...prev,
-      [field]: error,
-    }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -129,257 +139,338 @@ const RegisterPage = () => {
     });
 
     if (!nameError && !emailError && !passwordError) {
+      setIsLoading(true);
       try {
         const res = await api.post("/register", formData);
         const data = res.data;
         console.log("Response data:", data);
       } catch (error) {
         console.error("Registration error:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
-              Create Account
-            </h1>
-            <p className="text-gray-600">Sign up to get started</p>
+    <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20">
+      {/* Header */}
+      <div className="text-center mb-6">
+        <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-3 shadow-lg">
+          <UserPlus className="h-7 w-7 text-white" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-1">
+          Join Amigo Today!
+        </h2>
+        <p className="text-sm text-gray-600">
+          Create your account to get started
+        </p>
+      </div>
+
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        {/* Name Field */}
+        <div>
+          <label
+            htmlFor="name"
+            className="block text-sm font-semibold text-gray-700 mb-2"
+          >
+            Full Name
+          </label>
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <User
+                className={`h-5 w-5 transition-colors ${
+                  errors.name
+                    ? "text-red-400"
+                    : "text-gray-400 group-focus-within:text-blue-500"
+                }`}
+              />
+            </div>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all text-gray-800 ${
+                errors.name
+                  ? "border-red-400 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-100"
+                  : "border-gray-200 bg-gray-50 hover:bg-white focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              }`}
+              placeholder="Enter your full name"
+              disabled={isLoading}
+            />
+          </div>
+        </div>
+
+        {/* Email Field */}
+        <div>
+          <label
+            htmlFor="email"
+            className="block text-sm font-semibold text-gray-700 mb-2"
+          >
+            Email Address
+          </label>
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Mail
+                className={`h-5 w-5 transition-colors ${
+                  errors.email
+                    ? "text-red-400"
+                    : "text-gray-400 group-focus-within:text-blue-500"
+                }`}
+              />
+            </div>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition-all text-gray-800 ${
+                errors.email
+                  ? "border-red-400 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-100"
+                  : "border-gray-200 bg-gray-50 hover:bg-white focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              }`}
+              placeholder="you@example.com"
+              disabled={isLoading}
+            />
+          </div>
+        </div>
+
+        {/* Password Field */}
+        <div>
+          <label
+            htmlFor="password"
+            className="block text-sm font-semibold text-gray-700 mb-2"
+          >
+            Password
+          </label>
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Lock
+                className={`h-5 w-5 transition-colors ${
+                  errors.password
+                    ? "text-red-400"
+                    : "text-gray-400 group-focus-within:text-blue-500"
+                }`}
+              />
+            </div>
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              onFocus={() => setPasswordFocus(true)}
+              className={`w-full pl-12 pr-12 py-3 border-2 rounded-xl focus:outline-none transition-all text-gray-800 ${
+                errors.password
+                  ? "border-red-400 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-100"
+                  : "border-gray-200 bg-gray-50 hover:bg-white focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+              }`}
+              placeholder="Create a strong password"
+              disabled={isLoading}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-4 flex items-center transition-colors"
+              disabled={isLoading}
+            >
+              {showPassword ? (
+                <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+              ) : (
+                <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+              )}
+            </button>
           </div>
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* Name Field */}
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Full Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors  text-black ${
-                    errors.name
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-indigo-500"
-                  }`}
-                  placeholder="Enter your full name"
-                />
+          {/* Password Strength Bar */}
+          {formData.password && (
+            <div className="mt-2">
+              <div className="flex gap-1 mb-1.5">
+                {[1, 2, 3, 4, 5].map((level) => (
+                  <div
+                    key={level}
+                    className={`h-2 flex-1 rounded-full transition-all ${
+                      level <= passwordStrength
+                        ? getStrengthColor()
+                        : "bg-gray-200"
+                    }`}
+                  />
+                ))}
               </div>
-              {errors.name && (
-                <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                  <XCircle className="h-4 w-4" />
-                  {errors.name}
+              {passwordStrength > 0 && (
+                <p className="text-xs font-medium text-gray-600">
+                  Password strength: {getStrengthText()}
                 </p>
               )}
             </div>
+          )}
 
-            {/* Email Field */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors  text-black ${
-                    errors.email
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-indigo-500"
-                  }`}
-                  placeholder="Enter your email"
-                />
-              </div>
-              {errors.email && (
-                <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                  <XCircle className="h-4 w-4" />
-                  {errors.email}
-                </p>
-              )}
-            </div>
-
-            {/* Password Field */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-600" />
-                </div>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  onFocus={() => setPasswordFocus(true)}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors text-black ${
-                    errors.password
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-indigo-500"
-                  }`}
-                  placeholder="Enter your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+          {/* Compact Requirements on Focus */}
+          {passwordFocus && (
+            <div className="mt-2.5 p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+              <p className="text-xs font-semibold text-gray-700 mb-2">
+                Requirements:
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center gap-1.5 text-xs">
+                  {passwordChecks.length ? (
+                    <CheckCircle className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <XCircle className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
                   )}
-                </button>
-              </div>
-
-              {/* Password Requirements */}
-              {(passwordFocus || formData.password) && (
-                <div className="mt-3 p-3 bg-gray-50 rounded-lg space-y-2">
-                  <p className="text-xs font-medium text-gray-700 mb-2">
-                    Password must contain:
-                  </p>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-xs">
-                      {passwordChecks.length ? (
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <XCircle className="h-4 w-4 text-gray-400" />
-                      )}
-                      <span
-                        className={
-                          passwordChecks.length
-                            ? "text-green-700"
-                            : "text-gray-600"
-                        }
-                      >
-                        At least 8 characters
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs">
-                      {passwordChecks.uppercase ? (
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <XCircle className="h-4 w-4 text-gray-400" />
-                      )}
-                      <span
-                        className={
-                          passwordChecks.uppercase
-                            ? "text-green-700"
-                            : "text-gray-600"
-                        }
-                      >
-                        One uppercase letter (A-Z)
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs">
-                      {passwordChecks.lowercase ? (
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <XCircle className="h-4 w-4 text-gray-400" />
-                      )}
-                      <span
-                        className={
-                          passwordChecks.lowercase
-                            ? "text-green-700"
-                            : "text-gray-600"
-                        }
-                      >
-                        One lowercase letter (a-z)
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs">
-                      {passwordChecks.number ? (
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <XCircle className="h-4 w-4 text-gray-400" />
-                      )}
-                      <span
-                        className={
-                          passwordChecks.number
-                            ? "text-green-700"
-                            : "text-gray-600"
-                        }
-                      >
-                        One number (0-9)
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs">
-                      {passwordChecks.special ? (
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <XCircle className="h-4 w-4 text-gray-400" />
-                      )}
-                      <span
-                        className={
-                          passwordChecks.special
-                            ? "text-green-700"
-                            : "text-gray-600"
-                        }
-                      >
-                        One special character (!@#$%^&*)
-                      </span>
-                    </div>
-                  </div>
+                  <span
+                    className={
+                      passwordChecks.length
+                        ? "text-green-700 font-medium"
+                        : "text-gray-600"
+                    }
+                  >
+                    8+ characters
+                  </span>
                 </div>
-              )}
-
-              {errors.password && (
-                <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-                  <XCircle className="h-4 w-4" />
-                  {errors.password}
-                </p>
-              )}
+                <div className="flex items-center gap-1.5 text-xs">
+                  {passwordChecks.uppercase ? (
+                    <CheckCircle className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
+                  ) : (
+                    <XCircle className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                  )}
+                  <span
+                    className={
+                      passwordChecks.uppercase
+                        ? "text-green-700 font-medium"
+                        : "text-gray-600"
+                    }
+                  >
+                    Uppercase
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs">
+                  {passwordChecks.lowercase ? (
+                    <CheckCircle className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
+                  ) : (
+                    <XCircle className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                  )}
+                  <span
+                    className={
+                      passwordChecks.lowercase
+                        ? "text-green-700 font-medium"
+                        : "text-gray-600"
+                    }
+                  >
+                    Lowercase
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs">
+                  {passwordChecks.number ? (
+                    <CheckCircle className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
+                  ) : (
+                    <XCircle className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                  )}
+                  <span
+                    className={
+                      passwordChecks.number
+                        ? "text-green-700 font-medium"
+                        : "text-gray-600"
+                    }
+                  >
+                    Number
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs col-span-2">
+                  {passwordChecks.special ? (
+                    <CheckCircle className="h-3.5 w-3.5 text-green-500 flex-shrink-0" />
+                  ) : (
+                    <XCircle className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                  )}
+                  <span
+                    className={
+                      passwordChecks.special
+                        ? "text-green-700 font-medium"
+                        : "text-gray-600"
+                    }
+                  >
+                    Special character
+                  </span>
+                </div>
+              </div>
             </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
-            >
-              Create Account
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-gray-600">
-            Already have an account?{" "}
-            <a
-              href="#"
-              className="text-indigo-600 hover:text-indigo-700 font-medium"
-            >
-              Sign in
-            </a>
-          </p>
+          )}
         </div>
-      </div>
+
+        {/* Single Error Message at Bottom */}
+        {getFirstError() && (
+          <div className="bg-red-50 border-l-4 border-red-500 p-3 rounded-lg">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-red-800">
+                  Please fill required fields
+                </p>
+                <p className="text-sm text-red-700 mt-0.5">{getFirstError()}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={isLoading}
+          className={`w-full py-3 rounded-xl font-bold text-base transition-all focus:outline-none shadow-lg ${
+            isLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl"
+          }`}
+        >
+          {isLoading ? (
+            <span className="flex items-center justify-center gap-2">
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              Creating account...
+            </span>
+          ) : (
+            <span className="flex items-center justify-center gap-2">
+              Create Account
+              <Sparkles className="w-5 h-5" />
+            </span>
+          )}
+        </button>
+      </form>
+
+      {/* Sign In Link */}
+      <p className="mt-5 text-center text-sm text-gray-600">
+        Already have an account?{" "}
+        <Link
+          href="/login"
+          className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+        >
+          Sign in
+        </Link>
+      </p>
     </div>
   );
 };

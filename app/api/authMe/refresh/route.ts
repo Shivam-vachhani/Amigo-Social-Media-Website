@@ -26,6 +26,7 @@ export async function POST() {
       select: {
         name: true,
         email: true,
+        avatarUrl: true,
       },
     });
 
@@ -40,6 +41,7 @@ export async function POST() {
       userId: userId,
       name: userData.name,
       email: userData.email,
+      avatarUrl: userData.avatarUrl,
     })
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime("15m")

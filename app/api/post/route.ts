@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import cloudinary from "@/lib/cloudinary";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const postData = await req.formData();
     const userId = postData.get("userId") as string;
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
         (error, result) => {
           if (error) return reject(error);
           else resolve(result?.secure_url || null);
-        }
+        },
       );
       upload.end(buffer);
     });
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   try {
@@ -79,7 +79,7 @@ export async function GET(req: Request) {
   }
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   try {
     const postData = await req.formData();
     const postId = postData.get("postId") as string;
@@ -107,7 +107,7 @@ export async function PUT(req: Request) {
           (error, result) => {
             if (error) return reject(error);
             else resolve(result?.secure_url || null);
-          }
+          },
         );
         upload.end(buffer);
       });
@@ -140,7 +140,7 @@ export async function PUT(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");

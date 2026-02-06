@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-   "dev": "node server.js",
+    "dev": "node server.js",
     "build": "next build",
     "start": "NODE_ENV=production node server.js",
     "lint": "eslint"
@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

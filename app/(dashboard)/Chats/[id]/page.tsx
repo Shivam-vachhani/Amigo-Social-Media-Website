@@ -137,7 +137,7 @@ const ChatWindow: React.FC = () => {
       message: message,
       senderId: user?.userId as string,
       reciverId: id,
-      convoId: Chats?.convoId,
+      convoId: Chats?.convoId as string,
     });
   };
 

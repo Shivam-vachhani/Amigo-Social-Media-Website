@@ -1,8 +1,8 @@
 import prisma from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 
-export async function GET(req: Response) {
+export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
@@ -48,7 +48,7 @@ export async function GET(req: Response) {
   }
 }
 
-export async function POST(req: Response) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { notifId } = body;

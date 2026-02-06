@@ -1,9 +1,9 @@
 import prisma from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { SignJWT } from "jose";
 
-export async function POST(req: NextResponse) {
+export async function POST(req: NextRequest) {
   const body = await req.json();
 
   let res;
@@ -33,6 +33,7 @@ export async function POST(req: NextResponse) {
       user?.id,
       user?.email,
       user?.name,
+      user?.avatarUrl as string,
     );
 
     const updatedUser = await prisma.user.update({
@@ -72,7 +73,12 @@ export async function POST(req: NextResponse) {
   return res;
 }
 
-const createTokens = async (id: string, email: string, name: string) => {
+const createTokens = async (
+  id: string,
+  email: string,
+  name: string,
+  avatarUrl: string,
+) => {
   const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
   const refreshToken = await new SignJWT({ userId: id })
@@ -85,6 +91,7 @@ const createTokens = async (id: string, email: string, name: string) => {
     userId: id,
     email: email,
     name: name,
+    avatarUrl: avatarUrl,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("15m")

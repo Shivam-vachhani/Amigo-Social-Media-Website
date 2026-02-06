@@ -1,8 +1,8 @@
 import cloudinary from "@/lib/cloudinary";
 import prisma from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
@@ -10,7 +10,7 @@ export async function GET(req: Request) {
     if (!userId) {
       return NextResponse.json(
         { success: false, message: "user Id is missing" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -40,7 +40,7 @@ export async function GET(req: Request) {
     if (!userData) {
       return NextResponse.json(
         { success: false, message: "Invalid userId" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -57,7 +57,7 @@ export async function GET(req: Request) {
   }
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   try {
     const userData = await req.formData();
     const userId = userData.get("userId") as string;
@@ -86,7 +86,7 @@ export async function PUT(req: Request) {
           (error, result) => {
             if (error) return reject(error);
             else resolve(result?.secure_url || null);
-          }
+          },
         );
         upload.end(buffer);
       });
@@ -102,7 +102,7 @@ export async function PUT(req: Request) {
           (error, result) => {
             if (error) return reject(error);
             else resolve(result?.secure_url || null);
-          }
+          },
         );
         upload.end(buffer);
       });
@@ -133,7 +133,7 @@ export async function PUT(req: Request) {
         },
         {
           status: 401,
-        }
+        },
       );
     }
 

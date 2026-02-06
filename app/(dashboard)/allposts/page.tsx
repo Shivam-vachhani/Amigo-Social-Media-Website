@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Heart, MessageCircle, Send, Loader2 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "../context/authContext";
+import { useAuth } from "../../context/authContext";
 import { addLike, postComment } from "@/lib/apiCalls";
 import { api } from "@/lib/axios";
 import Image from "next/image";
@@ -215,7 +215,6 @@ const PostsPage: React.FC = () => {
     setUserComment({
       userId: user?.userId,
     });
-    console.log(posts);
   }, [isLoading, authLoading, user?.userId, posts]);
 
   // Loading State

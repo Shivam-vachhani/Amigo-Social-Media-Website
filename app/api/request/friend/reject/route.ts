@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: Response) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { reqId, notifId } = body;
@@ -32,7 +32,7 @@ export async function POST(req: Response) {
           success: false,
           message: "friend req status not updated",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 

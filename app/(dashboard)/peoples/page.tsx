@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Users, UserPlus, Search, Loader2, UserCheck, Clock } from "lucide-react";
+import { Users, UserPlus, Search, Loader2 } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { checkFriendReq, createFriendNotif, getAllUsers } from "@/lib/apiCalls";
-import { useAuth } from "../context/authContext";
+import { useAuth } from "../../context/authContext";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -21,13 +21,13 @@ interface User {
 type FriendStatus = "none" | "pending" | "friends";
 
 // Custom Card Component
-const Card: React.FC<{ 
-  children: React.ReactNode; 
+const Card: React.FC<{
+  children: React.ReactNode;
   className?: string;
   onClick?: () => void;
 }> = ({ children, className = "", onClick }) => {
   return (
-    <div 
+    <div
       className={`bg-white rounded-lg border border-gray-200 ${className}`}
       onClick={onClick}
     >
@@ -37,24 +37,26 @@ const Card: React.FC<{
 };
 
 // Custom CardContent Component
-const CardContent: React.FC<{ 
-  children: React.ReactNode; 
+const CardContent: React.FC<{
+  children: React.ReactNode;
   className?: string;
 }> = ({ children, className = "" }) => {
   return <div className={className}>{children}</div>;
 };
 
 // Custom Avatar Component
-const Avatar: React.FC<{ 
-  src?: string; 
-  alt?: string; 
+const Avatar: React.FC<{
+  src?: string;
+  alt?: string;
   fallback: string;
   className?: string;
 }> = ({ src, alt, fallback, className = "" }) => {
   const [imageError, setImageError] = useState<boolean>(false);
 
   return (
-    <div className={`rounded-full overflow-hidden flex items-center justify-center ${className}`}>
+    <div
+      className={`rounded-full overflow-hidden flex items-center justify-center ${className}`}
+    >
       {src && !imageError ? (
         <Image
           src={src}
@@ -100,7 +102,8 @@ const Badge: React.FC<{
   variant?: "default" | "secondary" | "outline";
   className?: string;
 }> = ({ children, variant = "default", className = "" }) => {
-  const baseStyles = "inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium";
+  const baseStyles =
+    "inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium";
   const variantStyles = {
     default: "bg-blue-100 text-blue-700",
     secondary: "bg-gray-100 text-gray-700",
@@ -116,9 +119,7 @@ const Badge: React.FC<{
 
 // Custom Skeleton Component
 const Skeleton: React.FC<{ className?: string }> = ({ className = "" }) => {
-  return (
-    <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
-  );
+  return <div className={`animate-pulse bg-gray-200 rounded ${className}`} />;
 };
 
 // Utility function for className merging
@@ -161,13 +162,14 @@ const AllUsersList: React.FC = () => {
   };
 
   // Filter users based on search query
-  const filteredUsers = data?.filter((ppl: User) => 
-    ppl.id !== user?.userId && (
-      ppl.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ppl.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ppl.bio?.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  ) || [];
+  const filteredUsers =
+    data?.filter(
+      (ppl: User) =>
+        ppl.id !== user?.userId &&
+        (ppl.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          ppl.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          ppl.bio?.toLowerCase().includes(searchQuery.toLowerCase())),
+    ) || [];
 
   // Log data on mount
   useEffect(() => {
@@ -278,9 +280,7 @@ const AllUsersList: React.FC = () => {
                 <p className="text-lg font-medium text-gray-900 mb-1">
                   No people found
                 </p>
-                <p className="text-gray-600">
-                  Try adjusting your search query
-                </p>
+                <p className="text-gray-600">Try adjusting your search query</p>
               </CardContent>
             </Card>
           ) : (
@@ -329,9 +329,7 @@ const AllUsersList: React.FC = () => {
                     </div>
 
                     {/* Action Button */}
-                    <div className="shrink-0">
-                      {renderActionButton(ppl.id)}
-                    </div>
+                    <div className="shrink-0">{renderActionButton(ppl.id)}</div>
                   </div>
                 </CardContent>
               </Card>
@@ -343,7 +341,8 @@ const AllUsersList: React.FC = () => {
       {/* Custom CSS for animations */}
       <style jsx>{`
         @keyframes pulse {
-          0%, 100% {
+          0%,
+          100% {
             opacity: 1;
           }
           50% {

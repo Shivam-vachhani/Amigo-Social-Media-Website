@@ -18,13 +18,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { logOutUser } from "@/lib/logout";
 import { useRouter, usePathname } from "next/navigation";
 import { useNotifications } from "@/hooks/useNotication";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   acceptFriendReq,
   getAllNotification,
   readNotification,
   rejectFriendReq,
 } from "@/lib/apiCalls";
+import Image from "next/image";
 
 // Modern Logo Component
 const ModernLogo = () => (
@@ -322,12 +323,28 @@ const Navbar = () => {
                 onClick={() => setOpenProfileMenu(!openProfileMenu)}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-gray-100 transition-colors"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-sm font-medium border-2 border-indigo-200">
-                  {user?.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </div>
+                {user?.avatarUrl ? (
+                  <div
+                    className={`rounded-full w-12 h-12 overflow-hidden flex items-center justify-center`}
+                  >
+                    <Image
+                      src={user?.avatarUrl || "/defaultAvatar.png"}
+                      alt={user.name || "Avatar"}
+                      width={34}
+                      height={34}
+                      quality={100}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-sm font-medium border-2 border-indigo-200">
+                    {user?.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </div>
+                )}
+
                 <span className="hidden sm:inline text-sm font-medium text-gray-900">
                   {user?.name.split(" ")[0]}
                 </span>
