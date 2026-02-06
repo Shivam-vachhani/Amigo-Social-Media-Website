@@ -147,8 +147,28 @@ export async function DELETE(req: NextRequest) {
 
     let isDeleted;
     if (id) {
+      const isLikesDelete = await prisma.like.deleteMany({
+        where: {
+          postId: id,
+        },
+      });
+
+      const isCommentsDeleted = await prisma.comment.deleteMany({
+        where: {
+          postId: id,
+        },
+      });
+
+      const isNotificationDeleted = await prisma.notification.deleteMany({
+        where: {
+          postId: id,
+        },
+      });
+
       isDeleted = await prisma.post.delete({
-        where: { id: id },
+        where: {
+          id: id,
+        },
       });
     }
 
