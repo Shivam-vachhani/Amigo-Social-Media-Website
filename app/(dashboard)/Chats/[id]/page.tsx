@@ -95,8 +95,6 @@ const ChatWindow: React.FC = () => {
   const [message, setMessage] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useGetChatNotification();
-
   // Fetch profile data
   const { data: profile, isLoading: loadingProfile } = useQuery<Profile>({
     queryKey: ["friendProfile", id],

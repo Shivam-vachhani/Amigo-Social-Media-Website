@@ -7,61 +7,51 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 export function useGetChatNotification() {
-  const [chatNotif, setChatNotif] = useState();
-  const [pusherChatNotif, setPusherChatNotif] = useState();
+  const [chatNotif, setChatNotif] = useState<any>(null);
   const { user } = useAuth();
-  const socket = getSocket();
   const queryClient = useQueryClient();
+
+  const isProd = process.env.NODE_ENV === "production";
 
   useEffect(() => {
     if (!user) return;
 
-    const channel = pusherClient.subscribe(`user-${user.userId}`);
-
     const handler = (data: any) => {
       setChatNotif(data);
-      setPusherChatNotif(data);
       queryClient.invalidateQueries({ queryKey: ["Chats"] });
-      console.log("====================================");
-      console.log("ChatNotif---->", data);
-      console.log("====================================");
+      console.log("Chat notification:", data);
     };
 
-    channel.bind("chatMessage", handler);
-
-    const ChatSeenHandler = (data: any) => {
+    const seenHandler = (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["Chats"] });
-      console.log("====================================");
-      console.log("ChatSeen---->", data);
-      console.log("====================================");
+      console.log("Chat seen:", data);
     };
 
-    channel.bind("changeMsgSeen", ChatSeenHandler);
+    // 🔥 PRODUCTION → PUSHER
+    if (isProd) {
+      const channel = pusherClient.subscribe(`user-${user.userId}`);
 
-    socket.on("connect", () => {
-      console.log("Socket connected from chat hook:", socket?.id);
-    });
-    socket.on("connect_error", (err: any) => {
-      console.error(" Socket connect_error:", err);
-    });
-    socket.on("disconnect", (reason: any) => {
-      console.log(" client socket disconnected", reason);
-    });
+      channel.bind("chatMessage", handler);
+      channel.bind("changeMsgSeen", seenHandler);
+
+      return () => {
+        channel.unbind("chatMessage", handler);
+        channel.unbind("changeMsgSeen", seenHandler);
+        pusherClient.unsubscribe(`user-${user.userId}`);
+      };
+    }
+
+    // 🔥 DEVELOPMENT → SOCKET.IO
+    const socket = getSocket();
 
     socket.on("chatMessage", handler);
-
-    socket.on("changeMsgSeen", ChatSeenHandler);
+    socket.on("changeMsgSeen", seenHandler);
 
     return () => {
       socket.off("chatMessage", handler);
-      socket.off("changeMsgSeen", ChatSeenHandler);
-      socket.off("connect");
-      socket.off("connect_error");
-      socket.off("disconnect");
-      channel.unbind("chatMessage", handler);
-      channel.unbind("changeMsgSeen", ChatSeenHandler);
-      pusherClient.unsubscribe(`user-${user.userId}`);
+      socket.off("changeMsgSeen", seenHandler);
     };
-  }, [user?.userId]);
-  return process.env.NODE_ENV === "development" ? chatNotif : pusherChatNotif;
+  }, [user, isProd, queryClient]);
+
+  return chatNotif;
 }
