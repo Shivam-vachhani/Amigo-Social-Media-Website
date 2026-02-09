@@ -14,7 +14,9 @@ const ChatNotificationPopUp = () => {
       // Reset states when new notification arrives
       setShouldRender(true);
       setIsVisible(false);
-
+      console.log("====================================");
+      console.log("from chat popup------->", chatNotificationData);
+      console.log("====================================");
       // Trigger slide-in animation after a brief delay
       const slideInTimer = setTimeout(() => {
         setIsVisible(true);
