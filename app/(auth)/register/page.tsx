@@ -15,6 +15,7 @@ import {
 import { RegisterUser } from "@/lib/interfaces";
 import { api } from "@/lib/axios";
 import Link from "next/link";
+import { logger } from "@/lib/logger";
 
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState<RegisterUser>({
@@ -143,9 +144,8 @@ const RegisterPage: React.FC = () => {
       try {
         const res = await api.post("/register", formData);
         const data = res.data;
-        console.log("Response data:", data);
       } catch (error) {
-        console.error("Registration error:", error);
+        logger.error("Registration error:", error);
       } finally {
         setIsLoading(false);
       }

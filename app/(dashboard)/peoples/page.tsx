@@ -6,6 +6,7 @@ import { checkFriendReq, createFriendNotif, getAllUsers } from "@/lib/apiCalls";
 import { useAuth } from "../../context/authContext";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { logger } from "@/lib/logger";
 
 // TypeScript Interfaces
 interface User {
@@ -143,11 +144,10 @@ const AllUsersList: React.FC = () => {
   const sendFriendReq = useMutation({
     mutationFn: createFriendNotif,
     onSuccess: () => {
-      console.log("successfully send friend req");
       setLoadingUserId(null);
     },
     onError: (res: Error) => {
-      console.error("send request mutation failed", res);
+      logger.error("send request mutation failed", res);
       setLoadingUserId(null);
     },
   });
@@ -170,11 +170,6 @@ const AllUsersList: React.FC = () => {
           ppl.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           ppl.bio?.toLowerCase().includes(searchQuery.toLowerCase())),
     ) || [];
-
-  // Log data on mount
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
 
   // Render action button
   const renderActionButton = (userId: string) => {

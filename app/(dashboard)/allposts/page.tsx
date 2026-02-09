@@ -6,6 +6,7 @@ import { useAuth } from "../../context/authContext";
 import { addLike, postComment } from "@/lib/apiCalls";
 import { api } from "@/lib/axios";
 import Image from "next/image";
+import { logger } from "@/lib/logger";
 
 // TypeScript Interfaces
 export interface Comment {
@@ -162,7 +163,7 @@ const PostsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["allPosts"] });
     },
     onError: (err: Error) => {
-      console.error("mutation Failed", err);
+      logger.error("mutation Failed", err);
     },
   });
 
@@ -173,7 +174,7 @@ const PostsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["allPosts"] });
     },
     onError: (err: Error) => {
-      console.error("mutation Failed", err);
+      logger.error("mutation Failed", err);
     },
   });
 
@@ -312,7 +313,7 @@ const PostsPage: React.FC = () => {
                       onClick={() => handleLike(post.id)}
                       className={cn(
                         "flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-300",
-                        likedPosts.includes(post.id)
+                        post.likes.some((like) => like.likerId === user?.userId)
                           ? "bg-red-50 text-red-600"
                           : "hover:bg-gray-100 text-gray-600 hover:text-gray-900",
                       )}
@@ -320,8 +321,9 @@ const PostsPage: React.FC = () => {
                       <Heart
                         className={cn(
                           "h-5 w-5 transition-transform duration-300",
-                          likedPosts.includes(post.id) &&
-                            "fill-current scale-110",
+                          post.likes.some(
+                            (like) => like.likerId === user?.userId,
+                          ) && "fill-current scale-110",
                         )}
                       />
                       <span className="text-sm font-medium">

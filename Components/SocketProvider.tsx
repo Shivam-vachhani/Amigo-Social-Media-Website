@@ -3,6 +3,7 @@
 import { getSocket } from "@/lib/socket-client";
 import { useEffect, useRef } from "react";
 import { useAuth } from "../app/context/authContext";
+import { logger } from "@/lib/logger";
 
 export default function SocketProvider({
   children,
@@ -17,8 +18,8 @@ export default function SocketProvider({
     socket.connect();
 
     const onConnect = () => {
-      console.log("socket connected from provider", { id: socket.id });
-      console.log("emitting join ->", `user:${user.userId}`);
+      logger.log("socket connected from provider", { id: socket.id });
+      logger.log("emitting join ->", `user:${user.userId}`);
       socket.emit("join", user.userId);
     };
 

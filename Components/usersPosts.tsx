@@ -18,6 +18,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { deletePost, getUserPosts, updatePost } from "@/lib/apiCalls";
 import { api } from "@/lib/axios";
 import Image from "next/image";
+import { logger } from "@/lib/logger";
 
 // TypeScript Interfaces
 export interface Post {
@@ -349,7 +350,7 @@ const PostsDashboard: React.FC<{ userId: string }> = ({ userId }) => {
       setIsSubmitting(false);
     },
     onError: (err) => {
-      console.error("mutation Failed", err);
+      logger.error("mutation Failed", err);
       setIsSubmitting(false);
     },
   });
@@ -360,7 +361,7 @@ const PostsDashboard: React.FC<{ userId: string }> = ({ userId }) => {
       queryClient.invalidateQueries({ queryKey: ["posts", userId] });
     },
     onError: (err) => {
-      console.error("Delete Mutation failed", err);
+      logger.error("Delete Mutation failed", err);
     },
   });
 
@@ -372,7 +373,7 @@ const PostsDashboard: React.FC<{ userId: string }> = ({ userId }) => {
       setIsSubmitting(false);
     },
     onError: (err) => {
-      console.error("Update Post Mutation Failed", err);
+      logger.error("Update Post Mutation Failed", err);
       setIsSubmitting(false);
     },
   });

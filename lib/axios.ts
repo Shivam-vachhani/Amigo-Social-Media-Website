@@ -1,5 +1,6 @@
 "use client";
 import axios from "axios";
+import { logger } from "./logger";
 
 export const api = axios.create({
   baseURL: "/api",
@@ -23,7 +24,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      console.log("🚨 401 detected, refreshing token...");
+      logger.log("🚨 401 detected, refreshing token...");
       if (isResfreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -39,9 +40,9 @@ api.interceptors.response.use(
           {},
           {
             withCredentials: true,
-          }
+          },
         );
-        console.log("✅ Refresh successful:", refreshResponse.data);
+        logger.log("✅ Refresh successful:", refreshResponse.data);
         processQueue(null);
         isResfreshing = false;
         return api(originalRequest);
@@ -54,5 +55,5 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );

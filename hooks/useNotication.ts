@@ -20,23 +20,20 @@ export function useNotifications() {
       setNotications((prev) => [data, ...prev]);
       setPusherNotif((prev) => [data, ...prev]);
       queryClient.invalidateQueries({ queryKey: ["notifiction"] });
-      console.log("====================================");
-      console.log("notification----->", data);
-      console.log("====================================");
     };
 
     channel.bind("notification", handler);
 
     socket.on("connect", () => {
-      // console.log("Socket connected:", socket?.id);
+
     });
 
     socket.on("connect_error", (err: any) => {
-      // console.error(" Socket connect_error:", err);
+
     });
 
     socket.on("disconnect", (reason: any) => {
-      // console.log(" client socket disconnected", reason);
+ 
     });
 
     socket.on("notification", handler);

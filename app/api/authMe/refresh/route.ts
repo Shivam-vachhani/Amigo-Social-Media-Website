@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import prisma from "@/lib/prisma";
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
@@ -8,7 +9,7 @@ export async function POST() {
   const refreshToken = cookieStore.get("refreshToken")?.value;
 
   if (!refreshToken) {
-    console.log("❌ No refresh token found in cookies");
+    logger.log("❌ No refresh token found in cookies");
     return NextResponse.json({
       success: false,
       message: "Can't find refresh token",
@@ -55,7 +56,7 @@ export async function POST() {
       path: "/",
       maxAge: 60 * 15,
     });
-    console.log("🔄 Refresh token endpoint called");
+    logger.log("🔄 Refresh token endpoint called");
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({

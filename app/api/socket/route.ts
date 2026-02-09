@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 
 let initialized = false;
@@ -7,7 +8,7 @@ export async function GET() {
     const server = (global as any).server;
     if (server) {
       initialized = true;
-      console.log("Socket initialized");
+      logger.log("Socket initialized");
     }
   }
 

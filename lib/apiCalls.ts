@@ -156,8 +156,6 @@ export async function checkFriendReq({
     const res = await api.get("/request/friend", {
       params: { reciverId: reciverId, senderId: senderId },
     });
-    console.log(res.data.req);
-
     return res.data.req;
   } catch (error) {
     throw error;
@@ -330,7 +328,6 @@ export async function UpdateMsgSeen({
       senderId,
       reciverId,
     });
-    console.log(res.data);
     socket.emit("changeMsgSeen", {
       ownerId: reciverId,
       senderId: senderId,

@@ -19,12 +19,10 @@ export function useGetChatNotification() {
     const handler = (data: any) => {
       setChatNotif(data);
       queryClient.invalidateQueries({ queryKey: ["Chats"] });
-      console.log("Chat notification:", data);
     };
 
     const seenHandler = (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["Chats"] });
-      console.log("Chat seen:", data);
     };
 
     // 🔥 PRODUCTION → PUSHER

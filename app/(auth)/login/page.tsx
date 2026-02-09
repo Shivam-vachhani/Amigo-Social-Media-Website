@@ -17,6 +17,7 @@ import { LoginUser } from "@/lib/interfaces";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/authContext";
 import { api } from "@/lib/axios";
+import { logger } from "@/lib/logger";
 
 const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState<LoginUser>({
@@ -112,7 +113,7 @@ const LoginPage: React.FC = () => {
           });
         }
       } catch (error) {
-        console.error("login Error :", error);
+        logger.error("login Error :", error);
       }
     }
     setIsLoading(false);

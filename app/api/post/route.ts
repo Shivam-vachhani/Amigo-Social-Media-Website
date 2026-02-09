@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import cloudinary from "@/lib/cloudinary";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   try {
@@ -184,7 +185,7 @@ export async function DELETE(req: NextRequest) {
       message: "Post Successfully Deleted",
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     return NextResponse.json({
       success: false,
       message: "Somthing went wrong in Deleting Post",

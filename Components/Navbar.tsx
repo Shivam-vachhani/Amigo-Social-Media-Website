@@ -26,6 +26,7 @@ import {
   rejectFriendReq,
 } from "@/lib/apiCalls";
 import Image from "next/image";
+import { logger } from "@/lib/logger";
 
 // Modern Logo Component
 const ModernLogo = () => (
@@ -89,7 +90,7 @@ const Navbar = () => {
       queryClient.invalidateQueries({ queryKey: ["notifiction"] });
     },
     onError: (err) => {
-      console.error("accept request mutation failed", err);
+      logger.error("accept request mutation failed", err);
     },
   });
 
@@ -99,7 +100,7 @@ const Navbar = () => {
       queryClient.invalidateQueries({ queryKey: ["notifiction"] });
     },
     onError: (err) => {
-      console.error("reject request mutation failed", err);
+      logger.error("reject request mutation failed", err);
     },
   });
 
@@ -121,7 +122,7 @@ const Navbar = () => {
       queryClient.invalidateQueries({ queryKey: ["notifiction"] });
     },
     onError: (res) => {
-      console.error("readNotification mutation failed", res);
+      logger.error("readNotification mutation failed", res);
     },
   });
 
@@ -129,20 +130,32 @@ const Navbar = () => {
     switch (type) {
       case "LIKE":
         return (
-          <div className="bg-gradient-to-br from-red-500 to-pink-500 p-2 w-9 h-9 rounded-xl flex justify-center items-center shadow-sm">
-            <HeartPlus size={18} color="white" />
+          <div className="bg-gradient-to-br from-red-500 to-pink-500 p-2 w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex justify-center items-center shadow-sm flex-shrink-0">
+            <HeartPlus
+              size={16}
+              className="sm:w-[18px] sm:h-[18px]"
+              color="white"
+            />
           </div>
         );
       case "FRIEND-REQUEST":
         return (
-          <div className="bg-gradient-to-br from-blue-500 to-indigo-500 p-2 w-9 h-9 rounded-xl flex justify-center items-center shadow-sm">
-            <UserRound size={18} color="white" />
+          <div className="bg-gradient-to-br from-blue-500 to-indigo-500 p-2 w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex justify-center items-center shadow-sm flex-shrink-0">
+            <UserRound
+              size={16}
+              className="sm:w-[18px] sm:h-[18px]"
+              color="white"
+            />
           </div>
         );
       case "COMMENTE":
         return (
-          <div className="bg-gradient-to-br from-amber-500 to-orange-500 p-2 w-9 h-9 rounded-xl flex justify-center items-center shadow-sm">
-            <MessageSquareMore size={18} color="white" />
+          <div className="bg-gradient-to-br from-amber-500 to-orange-500 p-2 w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex justify-center items-center shadow-sm flex-shrink-0">
+            <MessageSquareMore
+              size={16}
+              className="sm:w-[18px] sm:h-[18px]"
+              color="white"
+            />
           </div>
         );
       default:
@@ -174,14 +187,14 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/80 backdrop-blur-xl shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo */}
           <div
             className="cursor-pointer hover:opacity-90 transition-opacity flex space-x-2 items-center"
             onClick={() => router.push("/allposts")}
           >
             <ModernLogo />
-            <p className="text-2xl font-semibold">Amigo</p>
+            <p className="text-xl sm:text-2xl font-semibold">Amigo</p>
           </div>
 
           {/* Navigation Items - Center */}
@@ -202,31 +215,34 @@ const Navbar = () => {
           </nav>
 
           {/* Right Section */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Notifications */}
             <div className="relative">
               <button
                 onClick={() => setOpenNotification(!openNotification)}
-                className="relative p-2.5 rounded-xl hover:bg-gray-100 transition-colors"
+                className="relative p-2 sm:p-2.5 rounded-xl hover:bg-gray-100 transition-colors"
               >
-                <Bell size={22} className="text-gray-700" />
+                <Bell
+                  size={20}
+                  className="sm:w-[22px] sm:h-[22px] text-gray-700"
+                />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-xs font-bold text-white animate-pulse">
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 sm:w-5 sm:h-5 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold text-white animate-pulse">
                     {unreadCount}
                   </span>
                 )}
               </button>
 
-              {/* Notification Dropdown */}
+              {/* Notification Dropdown - Mobile Optimized */}
               {openNotification && (
                 <>
                   <div
                     className="fixed inset-0 z-40"
                     onClick={() => setOpenNotification(false)}
                   />
-                  <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-200 z-50 animate-slide-down overflow-hidden">
-                    <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-indigo-50 to-purple-50">
-                      <h3 className="font-semibold text-gray-900">
+                  <div className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-16 sm:top-auto mt-2 bg-white rounded-2xl shadow-xl border border-gray-200 z-50 animate-slide-down overflow-hidden max-w-md sm:w-96 mx-auto sm:mx-0">
+                    <div className="p-3 sm:p-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-indigo-50 to-purple-50">
+                      <h3 className="font-semibold text-sm sm:text-base text-gray-900">
                         Notifications
                       </h3>
                       <button
@@ -237,9 +253,9 @@ const Navbar = () => {
                       </button>
                     </div>
 
-                    <div className="max-h-80 overflow-y-auto">
+                    <div className="max-h-[60vh] sm:max-h-80 overflow-y-auto">
                       {data?.length === 0 ? (
-                        <p className="text-gray-500 p-6 text-center">
+                        <p className="text-gray-500 p-6 text-center text-sm">
                           No new notifications
                         </p>
                       ) : (
@@ -247,7 +263,7 @@ const Navbar = () => {
                           {data?.map((notif: any) => (
                             <div
                               key={notif.id}
-                              className={`p-4 flex items-center justify-center gap-3 transition-colors cursor-pointer ${
+                              className={`p-3 sm:p-4 flex items-start gap-2 sm:gap-3 transition-colors cursor-pointer ${
                                 notif.read
                                   ? "bg-gray-50/50"
                                   : "bg-white hover:bg-indigo-50/30"
@@ -260,7 +276,7 @@ const Navbar = () => {
                               {renderNotificationIcon(notif.type)}
                               <div className="flex-1 min-w-0">
                                 <p
-                                  className={`text-[15px] ${
+                                  className={`text-xs sm:text-[15px] ${
                                     notif.read
                                       ? "text-gray-500"
                                       : "text-gray-900 font-medium"
@@ -280,9 +296,12 @@ const Navbar = () => {
                                           e.stopPropagation();
                                           acceptReqHandler(notif);
                                         }}
-                                        className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 transition-all shadow-sm"
+                                        className="flex items-center gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-medium rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 transition-all shadow-sm"
                                       >
-                                        <Check size={14} />
+                                        <Check
+                                          size={12}
+                                          className="sm:w-[14px] sm:h-[14px]"
+                                        />
                                         Accept
                                       </button>
                                       <button
@@ -290,22 +309,25 @@ const Navbar = () => {
                                           e.stopPropagation();
                                           rejectReqHandler(notif);
                                         }}
-                                        className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                                        className="flex items-center gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs font-medium rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
                                       >
-                                        <X size={14} />
+                                        <X
+                                          size={12}
+                                          className="sm:w-[14px] sm:h-[14px]"
+                                        />
                                         Decline
                                       </button>
                                     </div>
                                   )}
 
                                 {notif.status === "ACCEPTED" && (
-                                  <span className="inline-block mt-2 px-2 py-1 text-xs font-medium rounded-lg bg-green-100 text-green-700">
+                                  <span className="inline-block mt-2 px-2 py-1 text-[11px] sm:text-xs font-medium rounded-lg bg-green-100 text-green-700">
                                     Accepted
                                   </span>
                                 )}
                               </div>
                               {!notif.read && (
-                                <div className="w-2 h-2 rounded-full bg-indigo-600 mt-2" />
+                                <div className="w-2 h-2 rounded-full bg-indigo-600 mt-1 flex-shrink-0" />
                               )}
                             </div>
                           ))}
@@ -321,11 +343,11 @@ const Navbar = () => {
             <div className="relative">
               <button
                 onClick={() => setOpenProfileMenu(!openProfileMenu)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-gray-100 transition-colors"
+                className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-xl hover:bg-gray-100 transition-colors"
               >
                 {user?.avatarUrl ? (
                   <div
-                    className={`rounded-full w-12 h-12 overflow-hidden flex items-center justify-center`}
+                    className={`rounded-full w-8 h-8 sm:w-10 sm:h-10 overflow-hidden flex items-center justify-center`}
                   >
                     <Image
                       src={user?.avatarUrl || "/defaultAvatar.png"}
@@ -337,7 +359,7 @@ const Navbar = () => {
                     />
                   </div>
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-sm font-medium border-2 border-indigo-200">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-xs sm:text-sm font-medium border-2 border-indigo-200">
                     {user?.name
                       .split(" ")
                       .map((n) => n[0])
@@ -348,7 +370,10 @@ const Navbar = () => {
                 <span className="hidden sm:inline text-sm font-medium text-gray-900">
                   {user?.name.split(" ")[0]}
                 </span>
-                <ChevronDown size={16} className="text-gray-600" />
+                <ChevronDown
+                  size={16}
+                  className="hidden sm:block text-gray-600"
+                />
               </button>
 
               {/* Profile Dropdown Menu */}
@@ -360,8 +385,10 @@ const Navbar = () => {
                   />
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-200 z-50 animate-slide-down overflow-hidden">
                     <div className="px-3 py-3 border-b border-gray-100">
-                      <p className="font-medium text-gray-900">{user?.name}</p>
-                      <p className="text-sm text-gray-500">View profile</p>
+                      <p className="font-medium text-gray-900 text-sm">
+                        {user?.name}
+                      </p>
+                      <p className="text-xs text-gray-500">View profile</p>
                     </div>
                     <div className="py-1">
                       <button
