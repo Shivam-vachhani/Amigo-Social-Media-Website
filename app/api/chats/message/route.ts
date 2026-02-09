@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { pusher } from "@/lib/pusher-server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -71,6 +72,16 @@ export async function POST(req: NextRequest) {
         { status: 401 },
       );
     }
+
+    const payload = {
+      MessageText: message,
+      senderId: senderId,
+      convoId: convo.id,
+      senderName: createMessage.sender.name,
+      senderAvtar: createMessage.sender.avatarUrl,
+    };
+
+    await pusher.trigger(`user-${reciverId}`, "chatMessage", payload);
 
     return NextResponse.json({
       success: true,
@@ -194,6 +205,13 @@ export async function PUT(req: NextRequest) {
         { status: 401 },
       );
     }
+
+    const payload = {
+      ownerId: reciverId,
+      senderId: senderId,
+    };
+
+    await pusher.trigger(`user-${senderId}`, "changeMsgSeen", payload);
 
     return NextResponse.json({
       success: true,

@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { pusher } from "@/lib/pusher-server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -69,6 +70,15 @@ export async function POST(req: NextRequest) {
         { status: 401 },
       );
     }
+
+    const payload = {
+      type: "FRIEND-REQUEST",
+      message: "send a friend request",
+      senderId: senderId,
+      friendReqId: notification.friendReqId,
+    };
+
+    await pusher.trigger(`user-${reciverId}`, "notification", payload);
 
     return NextResponse.json({ success: true, notification, req: createReq });
   } catch (error) {

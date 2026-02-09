@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { pusher } from "@/lib/pusher-server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -101,6 +102,16 @@ export async function POST(req: NextRequest) {
         message: "can't created notification",
       });
     }
+
+    const payload = {
+      type: "LIKE",
+      message: "liked your post",
+      senderName: notification.sender.name,
+      senderId: notification.sender.id,
+      id: notification.id,
+    };
+
+    await pusher.trigger(`user-${res.post.ownerId}`, "notification", payload);
 
     return NextResponse.json({
       success: true,

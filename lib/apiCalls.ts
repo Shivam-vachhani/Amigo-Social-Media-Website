@@ -1,8 +1,6 @@
-
 import { Comment } from "@/app/(dashboard)/allposts/page";
 import { api } from "./axios";
 import { getSocket } from "./socket-client";
-import axios from "axios";
 
 export async function getUserPosts(id: string) {
   try {
@@ -38,6 +36,7 @@ export async function postComment(comment: Comment) {
     const res = await api.post("/post/comment", comment, {
       withCredentials: true,
     });
+
     if (res.data.success) {
       socket.emit("notification", {
         toUserId: res.data.notification.reciverId,

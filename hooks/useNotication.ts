@@ -1,17 +1,31 @@
 "use client";
+import { useAuth } from "@/app/context/authContext";
+import { pusherClient } from "@/lib/pusher-client";
 import { getSocket } from "@/lib/socket-client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 export function useNotifications() {
   const [notification, setNotications] = useState<any[]>([]);
+  const [pusherNotif, setPusherNotif] = useState<any[]>([]);
+  const { user } = useAuth();
   const socket = getSocket();
   const queryClient = useQueryClient();
   useEffect(() => {
+    if (!user) return;
+
+    const channel = pusherClient.subscribe(`user-${user.userId}`);
+
     const handler = (data: any) => {
       setNotications((prev) => [data, ...prev]);
+      setPusherNotif((prev) => [data, ...prev]);
       queryClient.invalidateQueries({ queryKey: ["notifiction"] });
+      console.log("====================================");
+      console.log("notification----->", data);
+      console.log("====================================");
     };
+
+    channel.bind("notification", handler);
 
     socket.on("connect", () => {
       // console.log("Socket connected:", socket?.id);
@@ -32,7 +46,9 @@ export function useNotifications() {
       socket.off("connect");
       socket.off("disconnect");
       socket.off("connect_error");
+      channel.unbind("notification", handler);
+      pusherClient.unsubscribe(`user-${user.userId}`);
     };
-  }, []);
-  return notification;
+  }, [user?.userId]);
+  return process.env.NODE_ENV === "production" ? pusherNotif : notification;
 }

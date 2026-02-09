@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { pusher } from "@/lib/pusher-server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -53,6 +54,20 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    const payload = {
+      type: "COMMENT",
+      message: "Commented on your post",
+      senderId: userId,
+      senderName: notification.sender.name,
+      id: notification.id,
+    };
+
+    await pusher.trigger(
+      `user-${newComment.post.ownerId}`,
+      "notification",
+      payload,
+    );
+
     return NextResponse.json({
       success: true,
       message: "successfully posted your comment",
@@ -91,8 +106,6 @@ export async function GET(req: NextRequest) {
       success: true,
       comments: comments,
     });
-
-    
   } catch (error) {
     return NextResponse.json({
       success: false,
