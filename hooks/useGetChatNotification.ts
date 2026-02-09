@@ -62,6 +62,6 @@ export function useGetChatNotification() {
       channel.unbind("changeMsgSeen", ChatSeenHandler);
       pusherClient.unsubscribe(`user-${user.userId}`);
     };
-  }, []);
-  return process.env.NODE_ENV === "development" ? pusherChatNotif : chatNotif;
+  }, [user?.userId]);
+  return process.env.NODE_ENV === "development" ? chatNotif : pusherChatNotif;
 }
